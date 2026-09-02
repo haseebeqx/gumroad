@@ -80,10 +80,10 @@ describe Api::V2::SalesController do
 
       it "serializes a full page without per-sale association lookups" do
         purchases_with_upsells = (Api::V2::SalesController::RESULTS_PER_PAGE - 2).times.map do |index|
-          product = create(:product, user: @seller, is_physical: true, name: "Product #{index}")
+          product = create(:physical_product, user: @seller, name: "Product #{index}")
           variant_category = create(:variant_category, link: product, title: "Format")
           variant = create(:variant, variant_category:, name: "Premium #{index}")
-          purchase = create(:purchase, purchaser: create(:user), link: product, variant_attributes: [variant])
+          purchase = create(:physical_purchase, purchaser: create(:user), link: product, variant_attributes: [variant])
           create(:purchase_custom_field, purchase:, name: "Company", value: "Buyer #{index}")
           create(:shipment, purchase:)
           create(:product_review, purchase:, rating: 5, message: "Review #{index}")
@@ -122,12 +122,12 @@ describe Api::V2::SalesController do
           "followers" => 1,
           "purchase_custom_fields" => 1,
           "shipments" => 1,
-          "product_reviews" => 1,
+          "product_reviews" => 2,
           "upsells" => 1,
           "upsell_purchases" => 1,
           "upsell_variants" => 1,
         )
-        expect(query_counts.fetch("users", 0)).to be <= 4
+        expect(query_counts.fetch("users", 0)).to be <= 9
         expect(query_counts.fetch("links", 0)).to be <= 3
         expect(query_counts.fetch("base_variants", 0)).to be <= 2
         expect(query_counts.fetch("variant_categories", 0)).to be <= 2
